@@ -56,6 +56,14 @@ public class MvnDownloader {
 		this(pomFile, DEFAULT_TARGET_LOCAL_REPOSITORY, DEFAULT_MAVEN_REPOSITORY, DEFAULT_JAVA_SCOPE, repositoryListener);
 	}
 	
+	public MvnDownloader(File pomFile, String targetRepositoryPath, AbstractRepositoryListener repositoryListener) {
+		this(pomFile, targetRepositoryPath, DEFAULT_MAVEN_REPOSITORY, DEFAULT_JAVA_SCOPE, repositoryListener);
+	}
+	
+	public MvnDownloader(File pomFile, String targetRepositoryPath, String mvnRepositoryUrl, AbstractRepositoryListener repositoryListener) {
+		this(pomFile, targetRepositoryPath, mvnRepositoryUrl, DEFAULT_JAVA_SCOPE, repositoryListener);
+	}
+	
 	public MvnDownloader(File pomFile, String targetRepositoryPath, String mvnRepositoryUrl, String javaScope, AbstractRepositoryListener repositoryListener) {
 		this.pomFile = pomFile;
 		this.targetRepositoryPath = targetRepositoryPath;

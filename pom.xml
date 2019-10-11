@@ -4,7 +4,7 @@
 
   <groupId>anthunt.mvn</groupId>
   <artifactId>mvn-artifact-downloader</artifactId>
-  <version>0.0.2-RELEASE</version>
+  <version>0.0.3-RELEASE</version>
   <packaging>jar</packaging>
 
   <name>mvn-artifact-downloader</name>
@@ -87,9 +87,14 @@
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-assembly-plugin</artifactId>
 			    <configuration>
+			    <!-- 
 			        <descriptorRefs>
 			            <descriptorRef>jar-with-dependencies</descriptorRef>
 			        </descriptorRefs>
+			     -->
+			        <descriptors>
+			        	<descriptor>/jar-with-dependencies.xml</descriptor>
+			        </descriptors>
 			        <attach>false</attach>
 			    </configuration>
 			    <executions>
@@ -114,6 +119,7 @@
 		              		<echo>Ant Run</echo>
 		              		<echo>${project.artifactId}-${project.version}-jar-with-dependencies.jar</echo>
 		              		<echo>target/${project.artifactId}-${project.version}.jar</echo>
+		              		<delete file="target/${project.artifactId}-${project.version}.jar"/>
 							<move file="target/${project.artifactId}-${project.version}-jar-with-dependencies.jar" tofile="target/${project.artifactId}-${project.version}.jar"/>
 		              </target>
 		            </configuration>
