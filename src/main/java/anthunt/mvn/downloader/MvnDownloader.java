@@ -132,4 +132,8 @@ public class MvnDownloader {
 	    return central;
 	}
 	
+	public static void main(String[] args) {
+		
+	}
+	
 }
