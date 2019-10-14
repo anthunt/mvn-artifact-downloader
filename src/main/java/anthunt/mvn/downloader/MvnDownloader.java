@@ -25,10 +25,8 @@ import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.repository.RemoteRepository.Builder;
-import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
-import org.eclipse.aether.resolution.DependencyResult;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
@@ -86,20 +84,16 @@ public class MvnDownloader {
 	
 	    Model model = modelBuildingResult.getEffectiveModel();
 	    for (Dependency d : model.getDependencies()) {
-	        System.out.printf("processing dependency: %s\n", d);
-	        	        
-	        Artifact artifact = new DefaultArtifact(d.getGroupId(), d.getArtifactId(), d.getType(), d.getVersion());
-	        	
-        	CollectRequest collectRequest = new CollectRequest(new org.eclipse.aether.graph.Dependency(artifact, javaScope), remoteRepositories);
-            DependencyFilter filter = DependencyFilterUtils.classpathFilter(javaScope);
-            DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, filter);
-
-            DependencyResult dependencyResult = repositorySystem.resolveDependencies(repositorySystemSession, dependencyRequest);
-            List<ArtifactResult> artifactResults = dependencyResult.getArtifactResults();
-            for (ArtifactResult artifactResult2 : artifactResults) {
-				System.out.println(artifactResult2.getArtifact().getArtifactId());
-				
-			}
+	        if(javaScope.equals(d.getScope())) {	  
+	        	System.out.printf("processing dependency: %s, %s\n", d, d.getScope());
+		        Artifact artifact = new DefaultArtifact(d.getGroupId(), d.getArtifactId(), d.getType(), d.getVersion());
+		        	
+	        	CollectRequest collectRequest = new CollectRequest(new org.eclipse.aether.graph.Dependency(artifact, DEFAULT_JAVA_SCOPE), remoteRepositories);
+	            DependencyFilter filter = DependencyFilterUtils.classpathFilter(DEFAULT_JAVA_SCOPE);
+	            DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, filter);
+	
+	            repositorySystem.resolveDependencies(repositorySystemSession, dependencyRequest);
+	        }
 	
 	    }
 	}
