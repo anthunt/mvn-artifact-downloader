@@ -1,10 +1,12 @@
 package anthunt.mvn.downloader;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.building.DefaultModelBuilderFactory;
 import org.apache.maven.model.building.DefaultModelBuildingRequest;
@@ -33,6 +35,7 @@ import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
+import org.eclipse.aether.util.filter.ExclusionsDependencyFilter;
 
 public class MvnDownloader {
 
@@ -84,12 +87,27 @@ public class MvnDownloader {
 	
 	    Model model = modelBuildingResult.getEffectiveModel();
 	    for (Dependency d : model.getDependencies()) {
-	        if(javaScope.equals(d.getScope())) {	  
+	        if(javaScope.equals(d.getScope())) {
 	        	System.out.printf("processing dependency: %s, %s\n", d, d.getScope());
 		        Artifact artifact = new DefaultArtifact(d.getGroupId(), d.getArtifactId(), d.getType(), d.getVersion());
-		        	
+		        
+		        List<String> exclusionStrings = new ArrayList<String>();
+		        List<Exclusion> exclusions = d.getExclusions();
+		        for (Exclusion exclusion : exclusions) {
+		        	exclusionStrings.add(
+		        			new StringBuilder()
+		        				.append(exclusion.getGroupId())
+		        				.append(":")
+		        				.append(exclusion.getArtifactId())
+		        				.toString()
+		        	);
+		        }
+		        
 	        	CollectRequest collectRequest = new CollectRequest(new org.eclipse.aether.graph.Dependency(artifact, DEFAULT_JAVA_SCOPE), remoteRepositories);
-	            DependencyFilter filter = DependencyFilterUtils.classpathFilter(DEFAULT_JAVA_SCOPE);
+	            DependencyFilter filter = DependencyFilterUtils.andFilter(
+	            								DependencyFilterUtils.classpathFilter(DEFAULT_JAVA_SCOPE)
+	            								, new ExclusionsDependencyFilter(exclusionStrings)
+	            						  );
 	            DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, filter);
 	
 	            repositorySystem.resolveDependencies(repositorySystemSession, dependencyRequest);
@@ -135,7 +153,13 @@ public class MvnDownloader {
 	}
 	
 	public static void main(String[] args) {
-		
+		MvnDownloader mvnDownloader = new MvnDownloader(new File(args[0]), args[1], args[2], args[3], new AbstractRepositoryListener() {
+		});
+		try {
+			mvnDownloader.getAllDependencies();
+		} catch (DependencyResolutionException | ModelBuildingException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }
